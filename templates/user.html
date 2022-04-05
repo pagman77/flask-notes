@@ -2,9 +2,16 @@
 
 {% block content %} 
 
-
-<p>You made it!</p>
-
+<div>
+    <p>{{ user.username }}</p>
+    
+    <p>{{ user.email}}</p>
+    <p>{{ user.first_name}}</p>
+    <p>{{ user.last_name}}</p>
+</div>
+<form action="/logout" method="POST">
+<button class="btn btn-success" type="submit">Log Out</button>
+</form>
 
 {% endblock %}
 

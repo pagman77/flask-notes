@@ -4,7 +4,7 @@ from flask import Flask, jsonify, request, render_template, redirect, session, f
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import db, connect_db, User
-from forms import RegisterForm, LoginForm
+from forms import RegisterForm, LoginForm, CSRFProtectForm
 
 app = Flask(__name__)
 
@@ -51,7 +51,7 @@ def register_new_user():
 
         session["username"] = username
 
-        return redirect("/secret")
+        return redirect(f"/user/{username}")
 
     else:
         return render_template("register.html", form=form)
@@ -73,7 +73,7 @@ def login_user():
 
         if user:
             session["username"] = username # keep logged in
-            return redirect("/secret")
+            return redirect(f"/users/{username}")
 
         else:
             form.username.errors = ["Bad name/password"]
@@ -84,14 +84,29 @@ def login_user():
 # GET /secret
 # Return the text “You made it!” (don’t worry, we’ll get rid of this soon)
 
-@app.get("/secret")
-def login_page():
+@app.get("/users/<int:user_name>")
+def login_page(user_name):
     """check for username"""
 
     if session["username"]:
-        return render_template("user.html")
+        user = User.query.get_or_404(user_name)
+        
+        return render_template("user.html", user=user)
     else:
         flash("You're not authorized to view this page, punk.")
         return redirect("/login")
 
 
+
+
+@app.post("/logout")
+def logout():
+    """Logs user out and redirects to homepage."""
+
+    form = CSRFProtectForm()
+
+    if form.validate_on_submit():
+        # Remove "user_id" if present, but no errors if it wasn't
+        session.pop("username", None)
+
+    return redirect("/")
