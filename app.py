@@ -1,6 +1,6 @@
 """Flask app for Notes"""
 from click import password_option
-from flask import Flask, jsonify, request, render_template, redirect, session
+from flask import Flask, jsonify, request, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import db, connect_db, User
@@ -54,4 +54,44 @@ def register_new_user():
         return redirect("/secret")
 
     else:
-        return render_template("/register.html", form=form)
+        return render_template("register.html", form=form)
+
+
+@app.route("/login", methods=["GET","POST"])
+def login_user():
+    """Display form, or accept submission for login user."""
+
+    form = LoginForm()
+
+    if form.validate_on_submit():
+
+        username = form.username.data
+        password = form.password.data
+        
+
+        user = User.authenticate(username=username, password=password)
+
+        if user:
+            session["username"] = username # keep logged in
+            return redirect("/secret")
+
+        else:
+            form.username.errors = ["Bad name/password"]
+
+    return render_template("login.html", form=form)
+
+
+# GET /secret
+# Return the text “You made it!” (don’t worry, we’ll get rid of this soon)
+
+@app.get("/secret")
+def login_page():
+    """check for username"""
+
+    if session["username"]:
+        return render_template("user.html")
+    else:
+        flash("You're not authorized to view this page, punk.")
+        return redirect("/login")
+
+
