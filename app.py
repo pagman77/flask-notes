@@ -4,11 +4,11 @@ from flask import Flask, jsonify, request, render_template, redirect, session, f
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import db, connect_db, User
-from forms import NewUserForm
+from forms import RegisterForm, LoginForm
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///notes'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///notely'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = True
 
@@ -33,7 +33,7 @@ def hompage_redirect():
 def register_new_user():
     """Display form, or accept submission for new user."""
 
-    form = NewUserForm()
+    form = RegisterForm()
 
     if form.validate_on_submit():
 
@@ -67,7 +67,7 @@ def login_user():
 
         username = form.username.data
         password = form.password.data
-        
+
 
         user = User.authenticate(username=username, password=password)
 
