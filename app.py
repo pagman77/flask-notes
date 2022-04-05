@@ -17,7 +17,7 @@ db.create_all()
 
 app.config['SECRET_KEY'] = "I'LL NEVER TELL!!"
 
-# app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 debug = DebugToolbarExtension(app)
 
@@ -51,7 +51,7 @@ def register_new_user():
 
         session["username"] = username
 
-        return redirect(f"/user/{username}")
+        return redirect(f"/users/{username}")
 
     else:
         return render_template("register.html", form=form)
@@ -68,7 +68,6 @@ def login_user():
         username = form.username.data
         password = form.password.data
 
-
         user = User.authenticate(username=username, password=password)
 
         if user:
@@ -81,22 +80,19 @@ def login_user():
     return render_template("login.html", form=form)
 
 
-# GET /secret
-# Return the text “You made it!” (don’t worry, we’ll get rid of this soon)
-
-@app.get("/users/<int:user_name>")
+@app.get("/users/<user_name>")
 def login_page(user_name):
     """check for username"""
 
-    if session["username"]:
+    form = CSRFProtectForm()
+
+    if session.get("username") == user_name:
         user = User.query.get_or_404(user_name)
-        
-        return render_template("user.html", user=user)
+
+        return render_template("user.html", user=user, form=form)
     else:
         flash("You're not authorized to view this page, punk.")
         return redirect("/login")
-
-
 
 
 @app.post("/logout")
@@ -106,7 +102,6 @@ def logout():
     form = CSRFProtectForm()
 
     if form.validate_on_submit():
-        # Remove "user_id" if present, but no errors if it wasn't
         session.pop("username", None)
 
     return redirect("/")
