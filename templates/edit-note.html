@@ -7,7 +7,7 @@ Edit your note!
 
 {% block content %}
 
-<form id="edit-note-form" action="/notes/{{note.id}}/update" method="POST">
+<form id="edit-note-form" action="/notes/{{note_id}}/update" method="POST">
   {{ form.hidden_tag() }}
   <!--add type=hidden form fields -->
 
@@ -25,7 +25,7 @@ Edit your note!
 
   {% endfor %}
 
-  <a class="btn btn-outline-primary" href="/user/{{username}}">Cancel</a>
+  <a class="btn btn-outline-primary" href="/users/{{username}}">Cancel</a>
   <button class="btn btn-success" type="submit">Edit Note</button>
 </form>
 

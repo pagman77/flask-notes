@@ -11,13 +11,13 @@
   </div>
   <div class="col-6">
       <ul>
-          {% for note in notes %}
+          {% for note in user.notes %}
             <li> {{note.title}}
                 <a href="/notes/{{note.id}}/update">Update</a>
-                <a href="/notes/{{note.id}}/delete">Delete</a> 
+                <a href="/notes/{{note.id}}/delete">Delete</a>
             </li>
             {% endfor%}
-            <li><a class="btn btn-outline-primary" href="/user/{{user.name}}/notes/add">Add Note</a></li>
+            <li><a class="btn btn-outline-primary" href="/users/{{user.username}}/notes/add">Add Note</a></li>
         </ul>
     </div>
 </div>
@@ -26,7 +26,7 @@
   <button class="btn btn-success" type="submit">Log Out</button>
 </form>
 
-<form action="/users/{{user.username}}/delete" method="DELETE">
+<form action="/users/{{user.username}}/delete" method="POST">
   <button class="btn btn-danger" type="submit">Delete your account</button>
 </form>
 {% endblock %}

@@ -88,9 +88,8 @@ def user_page(user_name):
 
     if session.get("username") == user_name:
         user = User.query.get_or_404(user_name)
-        notes = user.notes
 
-        return render_template("user.html", user=user, form=form, notes=notes)
+        return render_template("user.html", user=user, form=form)
     else:
         flash("You're not authorized to view this page, punk.")
         return redirect("/login")
@@ -108,50 +107,52 @@ def logout():
     return redirect("/")
 
 
-@app.delete("/user/<username>/delete")
-def delete_post(username):
+@app.delete("/users/<username>/delete")
+def delete_user(username):
     """deletes all notes and then delete user from db"""
-    
+
     form = CSRFProtectForm()
 
     if form.validate_on_submit():
         user = User.query.get_or_404(username)
         Note.query.fiter_by(owner=username).delete()
+
         db.session.commit()
         db.session.delete(user)
+
         db.session.commit()
         session.pop("username", None)
     return redirect("/")
 
-@app.route("/user/<username>/notes/add", methods=["GET","POST"])
+@app.route("/users/<username>/notes/add", methods=["GET","POST"])
 def add_note(username):
     """Display form, or accept submission for new note."""
-        
+
     form = NoteForm()
 
     if session.get("username") == username:
         if form.validate_on_submit():
             title = form.title.data
             content = form.content.data
-            
 
-            note = Note(title=title, content=content)
+            note = Note(title=title, content=content, owner=username)
 
             db.session.add(note)
             db.session.commit()
-            return redirect(f"/user/{username}")
-        
+            return redirect(f"/users/{username}")
+
         else:
             return render_template("add-note.html", form=form, username=username)
+
     flash("unauthorized")
     return redirect("/")
-    
+
 @app.route("/notes/<int:note_id>/update", methods=["GET","POST"])
 def edit_note(note_id):
     """Display edit form, or accept submission for edit note."""
     curr_note = Note.query.get_or_404(note_id)
     form = NoteForm(obj=curr_note)
-    username = curr_note.username
+    username = curr_note.owner
 
     if session.get("username") == username:
         if form.validate_on_submit():
@@ -160,10 +161,10 @@ def edit_note(note_id):
 
             db.session.commit()
             flash("Successfully updated note!")
-            return redirect(f"/user/{username}")
-        
+            return redirect(f"/users/{username}")
+
         else:
-            return render_template("edit-note.html", form=form, username=username)
+            return render_template("edit-note.html", form=form, username=username, note_id=note_id)
     flash("unauthorized, you kid")
     return redirect("/")
 

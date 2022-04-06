@@ -7,7 +7,7 @@ Make a masterpiece!
 
 {% block content %}
 
-<form id="new-note-form" action="/user/{{username}}/notes/add" method="POST">
+<form id="new-note-form" action="/users/{{username}}/notes/add" method="POST">
   {{ form.hidden_tag() }}
   <!--add type=hidden form fields -->
 
@@ -25,7 +25,7 @@ Make a masterpiece!
 
   {% endfor %}
 
-  <a class="btn btn-outline-primary" href="/user/{{username}}">Cancel</a>
+  <a class="btn btn-outline-primary" href="/users/{{username}}">Cancel</a>
   <button class="btn btn-success" type="submit">Add Note</button>
 </form>
 

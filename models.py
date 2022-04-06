@@ -77,7 +77,7 @@ class Note(db.Model):
 
     content = db.Column(db.Text, nullable=False)
 
-    owner = db.Column(db.Integer, db.ForeignKey('user.username'), nullable=False)
+    owner = db.Column(db.Text, db.ForeignKey('users.username'), nullable=False)
 
 
 
