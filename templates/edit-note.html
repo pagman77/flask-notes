@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+Edit your note!
+{% endblock %}
+
+{% block content %}
+
+<form id="edit-note-form" action="/notes/{{note.id}}/update" method="POST">
+  {{ form.hidden_tag() }}
+  <!--add type=hidden form fields -->
+
+  {% for field in form
+  if field.widget.input_type != 'hidden' %}
+
+  <p>
+      {{ field.label }}
+      {{ field }}
+
+      {% for error in field.errors %}
+      {{ error }}
+      {% endfor %}
+  </p>
+
+  {% endfor %}
+
+  <a class="btn btn-outline-primary" href="/user/{{username}}">Cancel</a>
+  <button class="btn btn-success" type="submit">Edit Note</button>
+</form>
+
+{% endblock %}

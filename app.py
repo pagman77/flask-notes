@@ -3,8 +3,8 @@ from click import password_option
 from flask import Flask, jsonify, request, render_template, redirect, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 
-from models import db, connect_db, User
-from forms import RegisterForm, LoginForm, CSRFProtectForm
+from models import db, connect_db, User, Note
+from forms import RegisterForm, LoginForm, CSRFProtectForm, NoteForm
 
 app = Flask(__name__)
 
@@ -81,15 +81,16 @@ def login_user():
 
 
 @app.get("/users/<user_name>")
-def login_page(user_name):
+def user_page(user_name):
     """check for username"""
 
     form = CSRFProtectForm()
 
     if session.get("username") == user_name:
         user = User.query.get_or_404(user_name)
+        notes = user.notes
 
-        return render_template("user.html", user=user, form=form)
+        return render_template("user.html", user=user, form=form, notes=notes)
     else:
         flash("You're not authorized to view this page, punk.")
         return redirect("/login")
@@ -105,3 +106,88 @@ def logout():
         session.pop("username", None)
 
     return redirect("/")
+
+
+@app.delete("/user/<username>/delete")
+def delete_post(username):
+    """deletes all notes and then delete user from db"""
+    
+    form = CSRFProtectForm()
+
+    if form.validate_on_submit():
+        user = User.query.get_or_404(username)
+        Note.query.fiter_by(owner=username).delete()
+        db.session.commit()
+        db.session.delete(user)
+        db.session.commit()
+        session.pop("username", None)
+    return redirect("/")
+
+@app.route("/user/<username>/notes/add", methods=["GET","POST"])
+def add_note(username):
+    """Display form, or accept submission for new note."""
+        
+    form = NoteForm()
+
+    if session.get("username") == username:
+        if form.validate_on_submit():
+            title = form.title.data
+            content = form.content.data
+            
+
+            note = Note(title=title, content=content)
+
+            db.session.add(note)
+            db.session.commit()
+            return redirect(f"/user/{username}")
+        
+        else:
+            return render_template("add-note.html", form=form, username=username)
+    flash("unauthorized")
+    return redirect("/")
+    
+@app.route("/notes/<int:note_id>/update", methods=["GET","POST"])
+def edit_note(note_id):
+    """Display edit form, or accept submission for edit note."""
+    curr_note = Note.query.get_or_404(note_id)
+    form = NoteForm(obj=curr_note)
+    username = curr_note.username
+
+    if session.get("username") == username:
+        if form.validate_on_submit():
+            curr_note.title = form.title.data
+            curr_note.content = form.content.data
+
+            db.session.commit()
+            flash("Successfully updated note!")
+            return redirect(f"/user/{username}")
+        
+        else:
+            return render_template("edit-note.html", form=form, username=username)
+    flash("unauthorized, you kid")
+    return redirect("/")
+
+
+
+
+# For each note, display with a link to a form to edit the note and a button to delete the note.
+
+# Have a link that sends you to a form to add more notes and a button to delete the entire user account, including their notes.
+
+# POST /users/<username>/delete
+# Remove the user from the database and make sure to also delete all of their notes. Clear any user information in the session and redirect to /.
+
+# As with the logout route, make sure you have CSRF protection for this.
+
+# GET /users/<username>/notes/add
+# Display a form to add notes.
+# POST /users/<username>/notes/add
+# Add a new note and redirect to /users/<username>
+# GET /notes/<note-id>/update
+# Display a form to edit a note.
+# POST /notes/<note-id>/update
+# Update a note and redirect to /users/<username>.
+# POST /notes/<note-id>/delete
+# Delete a note and redirect to /users/<username>.
+
+# As with the logout and delete routes, make sure you have CSRF protection for this.

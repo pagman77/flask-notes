@@ -2,15 +2,31 @@
 
 {% block content %}
 
-<div>
+<div class="row">
+    <div class="col-6">
   <p>{{ user.username }}</p>
   <p>{{ user.email}}</p>
   <p>{{ user.first_name}}</p>
   <p>{{ user.last_name}}</p>
+  </div>
+  <div class="col-6">
+      <ul>
+          {% for note in notes %}
+            <li> {{note.title}}
+                <a href="/notes/{{note.id}}/update">Update</a>
+                <a href="/notes/{{note.id}}/delete">Delete</a> 
+            </li>
+            {% endfor%}
+            <li><a class="btn btn-outline-primary" href="/user/{{user.name}}/notes/add">Add Note</a></li>
+        </ul>
+    </div>
 </div>
 <form action="/logout" method="POST">
   {{ form.hidden_tag() }}
   <button class="btn btn-success" type="submit">Log Out</button>
 </form>
 
+<form action="/users/{{user.username}}/delete" method="DELETE">
+  <button class="btn btn-danger" type="submit">Delete your account</button>
+</form>
 {% endblock %}

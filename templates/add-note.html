@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+Make a masterpiece!
+{% endblock %}
+
+{% block content %}
+
+<form id="new-note-form" action="/user/{{username}}/notes/add" method="POST">
+  {{ form.hidden_tag() }}
+  <!--add type=hidden form fields -->
+
+  {% for field in form
+  if field.widget.input_type != 'hidden' %}
+
+  <p>
+      {{ field.label }}
+      {{ field }}
+
+      {% for error in field.errors %}
+      {{ error }}
+      {% endfor %}
+  </p>
+
+  {% endfor %}
+
+  <a class="btn btn-outline-primary" href="/user/{{username}}">Cancel</a>
+  <button class="btn btn-success" type="submit">Add Note</button>
+</form>
+
+{% endblock %}
